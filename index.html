@@ -1,0 +1,205 @@
+<!DOCTYPE>
+<html>
+<head>
+	<title>16x16 sprite table</title>
+	<style>
+		* {margin: 0; padding: 0;}
+		html, body {background: black; font-family: Consolas; font-size: 1em; color: #7faf00;}
+		table {border-collapse: collapse; width: 256px; height: 256px;}
+		table tr td {width: 16px; height: 16px; font-size: 0.7em; text-align: center; padding: 0; cursor: pointer; background: transparent;}
+		input[type=text] {height: 18px; border: 1px solid #7f7f00; text-transform: uppercase; text-indent: 3px; background: transparent; color: #7faf00; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;}
+		
+		#container {width: 256px; margin: 32px auto; position: relative;}
+		
+		#top-index-grid {position: absolute; top: -16px; height: 16px;}		
+		#left-index-grid {position: absolute; left: -16px; width: 16px;}
+		#sprite-grid tr td {border: 1px solid #7f7f00; font-size: 8px;}
+		#sprite-grid-16 {width: 16px; height: 16px; position: absolute; left: 272px; top: 240px;}
+		#sprite-grid-16 tr td {width: 1px; height: 1px;}
+		#sprite-grid-32 {width: 32px; height: 32px; position: absolute; left: 304px; top: 224px;}
+		#sprite-grid-32 tr td {width: 2px; height: 2px;}
+		#sprite-grid-48 {width: 48px; height: 48px; position: absolute; left: 352px; top: 208px;}
+		#sprite-grid-48 tr td {width: 3px; height: 3px;}
+		
+		#txt-hex-code {margin-top: 16px; width: 256px;}
+		
+		.color-selector {margin-top: 10px;}
+		.color-selector.first {margin-top: 16px;}
+		.color-selector span.color-picker {float: left; width: 16px; height: 16px; border: 1px solid #7f7f00; background: transparent; cursor: pointer;}
+		.color-selector span.color-picker.selected {}
+		.color-selector input[type=text] {margin-left: 16px;}
+	</style>
+	<script type="text/javascript">
+		window.onload = function() {
+		
+			var	n = 16,
+				top_index_grid = document.getElementById("top-index-grid"),
+				left_index_grid = document.getElementById("left-index-grid"),				
+				sprite_grid = document.getElementById("sprite-grid"),
+				sprite_grid_16 = document.getElementById("sprite-grid-16"),
+				sprite_grid_32 = document.getElementById("sprite-grid-32"),
+				sprite_grid_48 = document.getElementById("sprite-grid-48"),
+				row,
+				cell,
+				cellText;
+				
+			// top-index-grid
+			row = document.createElement("tr");
+			top_index_grid.appendChild(row);
+			for (var r = 0; r < n; r++)
+			{
+				cell = document.createElement("td");
+				row.appendChild(cell);
+				
+				cellText= document.createTextNode(r.toString(16));
+				cell.appendChild(cellText);
+			}
+			
+			// left-index-grid
+			for (var r = 0; r < n; r++)
+			{
+				row = document.createElement("tr");
+				left_index_grid.appendChild(row);
+
+				cell = document.createElement("td");
+				row.appendChild(cell);
+				
+				cellText= document.createTextNode(r.toString(16));
+				cell.appendChild(cellText);
+			}
+			
+			// sprite-grid
+			_drawSpriteGrid(sprite_grid);
+			
+			// sprite-grid-16
+			_drawSpriteGrid(sprite_grid_16, "16_");
+			
+			// sprite-grid-32
+			_drawSpriteGrid(sprite_grid_32, "32_");
+			
+			// sprite-grid-48
+			_drawSpriteGrid(sprite_grid_48, "48_");
+			
+			// event handlers on color controls
+			var oldColor,
+				selectedColor;
+			var	color_0 = document.getElementById("color-0"),
+				color_1 = document.getElementById("color-1"),
+				color_2 = document.getElementById("color-2"),
+				color_3 = document.getElementById("color-3"),
+				txt_color_0 = document.getElementById("txt-color-0"),
+				txt_color_1 = document.getElementById("txt-color-1"),
+				txt_color_2 = document.getElementById("txt-color-2"),
+				txt_color_3 = document.getElementById("txt-color-3");
+				
+			txt_color_0.addEventListener("focus", function(){ oldColor = txt_color_0.value; txt_color_0.value = "#"; }, false);
+			txt_color_0.addEventListener("change", function(){ color_0.style.background = sprite_grid.style.background = _checkAndSetColor(txt_color_0.value, oldColor); }, false);
+			txt_color_0.addEventListener("blur", function(){ txt_color_0.value = _checkAndSetColor(txt_color_0.value, oldColor); }, false);
+			
+			txt_color_1.addEventListener("focus", function(){ oldColor = txt_color_1.value; txt_color_1.value = "#"; }, false);
+			txt_color_1.addEventListener("change", function(){ color_1.style.background = _checkAndSetColor(txt_color_1.value, oldColor); }, false);			
+			txt_color_1.addEventListener("blur", function(){ txt_color_1.value = _checkAndSetColor(txt_color_1.value, oldColor); }, false);
+			
+			txt_color_2.addEventListener("focus", function(){ oldColor = txt_color_2.value; txt_color_2.value = "#"; }, false);
+			txt_color_2.addEventListener("change", function(){ color_2.style.background = _checkAndSetColor(txt_color_2.value, oldColor); }, false);			
+			txt_color_2.addEventListener("blur", function(){ txt_color_2.value = _checkAndSetColor(txt_color_2.value, oldColor); }, false);
+			
+			txt_color_3.addEventListener("focus", function(){ oldColor = txt_color_3.value; txt_color_3.value = "#"; }, false);
+			txt_color_3.addEventListener("change", function(){ color_3.style.background = _checkAndSetColor(txt_color_3.value, oldColor); }, false);			
+			txt_color_3.addEventListener("blur", function(){ txt_color_3.value = _checkAndSetColor(txt_color_3.value, oldColor); }, false);
+
+			color_0.addEventListener("mouseup", function(){ selectedColor = color_0.style.background; }, false);
+			color_1.addEventListener("mouseup", function(){ selectedColor = color_1.style.background; }, false);
+			color_2.addEventListener("mouseup", function(){ selectedColor = color_2.style.background; }, false);
+			color_3.addEventListener("mouseup", function(){ selectedColor = color_3.style.background; }, false);
+			
+			
+			function _drawSpriteGrid(grid, idPrefix)
+			{
+				idPrefix = idPrefix || "";
+				for (var r = 0; r < n; r++)
+				{
+					row = document.createElement("tr");
+					grid.appendChild(row);
+					
+					for (var c = 0; c < n; c++)
+					{
+						cell = document.createElement("td");
+						cell.id = idPrefix + r.toString(16) + "_" + c.toString(16);
+						row.appendChild(cell);
+						
+						cell.addEventListener("mouseup", _setPixel, false);
+						
+						//cellText= document.createTextNode(cell.id);
+						//cell.appendChild(cellText);
+					}
+				}
+			}
+			
+			function _checkAndSetColor(color, oldColor)
+			{
+				color = color.toUpperCase().replace("#", "");
+				switch (color)
+				{
+					case "":
+						return oldColor;
+						break;
+					case "TRANSPARENT":
+						return color;
+						break;
+					default:
+						var	s = "0123456789ABCDEF",
+							chars = color.split("");
+							
+						if (chars.length != 3 && chars.length != 6)
+							return oldColor;
+							
+						for (var i=0, j=chars.length; i<j; i++) {
+							if (s.indexOf(chars[i]) < 0) 
+								return oldColor;
+						}
+						
+						return "#"+color;
+						break;
+				}
+			}
+			
+			function _setPixel(e)
+			{
+				if (window.event) e = window.event;
+				var srcE = e.srcElement ? e.srcElement : e.target;
+				srcE.style.background = selectedColor;
+				
+				// draw on sprite-grid-16
+				document.getElementById("16_" + srcE.id).style.background = selectedColor;
+				// draw on sprite-grid-32
+				document.getElementById("32_" + srcE.id).style.background = selectedColor;
+				// draw on sprite-grid-48
+				document.getElementById("48_" + srcE.id).style.background = selectedColor;
+			}
+			
+		};
+	</script>	
+</head>
+<body>
+
+	<div id="container">		
+		
+		<table id="top-index-grid"></table>
+		<table id="left-index-grid"></table>		
+		<table id="sprite-grid"></table>
+		<table id="sprite-grid-16"></table>		
+		<table id="sprite-grid-32"></table>
+		<table id="sprite-grid-48"></table>
+		
+		<input id="txt-hex-code" type="text" value="" />
+		
+		<div class="color-selector first" title="background - color 0"><span id="color-0" class="color-picker" style="background: transparent;"></span><input id="txt-color-0" type="text" value="transparent" /></div>
+		<div class="color-selector" title="color 1"><span id="color-1" class="color-picker" style="background: #f00;"></span><input id="txt-color-1" type="text" value="#f00" /></div>
+		<div class="color-selector" title="color 2"><span id="color-2" class="color-picker" style="background: #0f0;"></span><input id="txt-color-2" type="text" value="#0f0" /></div>
+		<div class="color-selector" title="color 3"><span id="color-3" class="color-picker" style="background: #00f;"></span><input id="txt-color-3" type="text" value="#00f" /></div>
+		
+	</div>
+
+</body>
+</html>
